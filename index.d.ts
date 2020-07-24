@@ -4,7 +4,7 @@ export type Dimensions = {
     Length: number;
     Width: number;
     Height: number;
-    Unit: 'cm';
+    Unit: 'cm'; // TODO: is 'cm' really the only valid option? that's what the docs indicate.
     Name?: string;
 };
 export type InvoiceData = {
@@ -21,7 +21,7 @@ export type ScheduledPackageId = {
 };
 export type Weight = {
     Value: number;
-    Unit: 'g';
+    Unit: 'g'; // TODO: is 'g' really the only valid option? that's what the docs indicate.
 };
 export type PickupSlot = {
     SlotId: string;
@@ -87,17 +87,17 @@ export type AdjustmentEvent = {
     PostedDate: DateTime;
 };
 export type AffordabilityExpenseEvent = {
-    /* cSpell: disable */
     PostedDate?: DateTime;
     TransactionType?: 'Charge' | 'Refund';
     AmazonOrderId?: string;
     BaseExpense?: CurrencyAmount;
     TotalExpense?: CurrencyAmount;
+    /* cSpell: disable */
     TaxTypeIGST?: CurrencyAmount;
     TaxTypeCGST?: CurrencyAmount;
     TaxTypeSGST?: CurrencyAmount;
-    MarketplaceId?: string;
     /* cSpell: enable */
+    MarketplaceId?: string;
 };
 export type AffordabilityExpenseReversalEvent = AffordabilityExpenseEvent;
 export type ChargeComponent = {
@@ -129,10 +129,12 @@ export type ChargeComponent = {
     | 'PaymentMethodFee'
     | 'ExportCharge'
     | 'SAFE-TReimbursement'
+    /* cSpell: disable */
     | 'TCS-CGST'
     | 'TCS-SGST'
     | 'TCS-IGST'
     | 'TCS-UTGST';
+    /* cSpell: enable */
     ChargeAmount?: CurrencyAmount;
 };
 export type ChargeInstrument = {
@@ -196,13 +198,180 @@ export type FinancialEventGroup = {
     FinancialEventGroupStart?: DateTime;
     FinancialEventGroupEnd?: DateTime;
 };
-// TODO continue, from https://docs.developer.amazonservices.com/en_UK/finances/Finances_Datatypes.html#AffordabilityExpenseReversalEvent
-// export type FinancialEvents = {
-//     ShipmentEventList?: Array<ShipmentEvent>;
-//     RefundEventList?: Array<ShipmentEvent>;
-//     GuaranteeClaimEventList?: Array<ShipmentEvent>;
-//     ChargebackEventList?: Array<ShipmentEvent>;
-//     PayWithAmazonEventList?: Array<PayWithAmazonEvent>;
-//     ServiceProviderCreditEventList?: Array<SolutionProviderCreditEvent>;
-//     RetrochargeEventList?: Array<RetrochargeEvent>;
-// }
+export type PerformanceBondRefundEvent = {
+    // TODO: This is empty in the documentation!
+};
+export type FinancialEvents = {
+    ShipmentEventList?: Array<ShipmentEvent>;
+    RefundEventList?: Array<ShipmentEvent>;
+    GuaranteeClaimEventList?: Array<ShipmentEvent>;
+    ChargebackEventList?: Array<ShipmentEvent>;
+    PayWithAmazonEventList?: Array<PayWithAmazonEvent>;
+    ServiceProviderCreditEventList?: Array<SolutionProviderCreditEvent>;
+    RetrochargeEventList?: Array<RetrochargeEvent>;
+    RentalTransactionEventList?: Array<RentalTransactionEvent>;
+    PerformanceBondRefundEventList?: Array<PerformanceBondRefundEvent>;
+    ProductAdsPaymentEventList?: Array<ProductAdsPaymentEvent>;
+    ServiceFeeEventList?: Array<ServiceFeeEvent>;
+    DebtRecoveryEventList?: Array<DebtRecoveryEvent>;
+    LoanServicingEventList?: Array<LoanServicingEvent>;
+    AdjustmentEventList?: Array<AdjustmentEvent>;
+    CouponPaymentEventList?: Array<CouponPaymentEvent>;
+    SAFETReimbursementEventList?: Array<SAFETReimbursementEvent>;
+    SellerReviewEnrollmentPaymentEventList?: Array<SellerReviewEnrollmentPaymentEvent>;
+    FBALiquidationEventList?: Array<FBALiquidationEvent>;
+    ImagingServicesFeeEventList?: Array<ImagingServicesFeeEvent>;
+    AffordabilityExpenseEventList?: Array<AffordabilityExpenseEvent>;
+    AffordabilityExpenseReversalEventList?: Array<AffordabilityExpenseReversalEvent>;
+    NetworkComminglingTransactionEventList?: Array<NetworkComminglingTransactionEvent>;
+    TDSReimbursementEventList?: Array<TDSReimbursementEvent>;
+};
+export type ImagingServicesFeeEvent = {
+    ImagingRequestBillingItemID?: string;
+    ASIN?: string;
+    PostedDate?: string;
+    FeeList?: Array<FeeComponent>
+};
+export type LoanServicingEvent = {
+    LoanAmount?: CurrencyAmount;
+    SourceBusinessEventType?: 'LoanAdvance' | 'LoanPayment' | 'LoanRefund';
+};
+export type NetworkComminglingTransactionEvent = {
+    PostedDate?: string;
+    NetCoTransactionID?: string;
+    SwapReason?: string;
+    TransactionType?: 'NetCo' | 'ComminglingVAT';
+    ASIN?: string;
+    MarketplaceId?: string;
+    TaxExclusiveAmount?: CurrencyAmount;
+    TaxAmount?: CurrencyAmount;
+};
+export type PayWithAmazonEvent = {
+    SellerOrderId?: string;
+    TransactionPostedDate?: string;
+    BusinessObjectType?: 'PaymentContract';
+    SalesChannel?: string;
+    Charge?: ChargeComponent;
+    FeeList?: Array<FeeComponent>;
+    PaymentAmountType?: 'Sales';
+    AmountDescription?: string;
+    FulfillmentChannel?: 'AFN' | 'MFN';
+    StoreName?: string;
+};
+export type ProductAdsPaymentEvent = {
+    // TODO: documentation shows these camelCased?! is that for real?
+    postedDate?: string; // TODO: should dates be a type DateTime ?
+    transactionType?: 'charge' | 'refund';
+    invoiceId?: string;
+    baseValue?: CurrencyAmount;
+    taxValue?: CurrencyAmount;
+    transactionValue?: CurrencyAmount;
+};
+export type Promotion = {
+    PromotionType?: string;
+    PromotionId?: string;
+    PromotionAmount?: CurrencyAmount;
+};
+export type RentalTransactionEvent = {
+    AmazonOrderId?: string;
+    RentalEventType?:
+    | 'RentalCustomerPayment-Buyout'
+    | 'RentalCustomerPayment-Extension'
+    | 'RentalCustomerRefund-Buyout'
+    | 'RentalCustomerRefund-Extension'
+    | 'RentalHandlingFee'
+    | 'RentalChargeFailureReimbursement'
+    | 'RentalLostItemReimbursement';
+    ExtensionLength?: number;
+    PostedDate?: string;
+    RentalChargeList?: Array<ChargeComponent>;
+    RentalFeeList?: Array<FeeComponent>;
+    MarketplaceName?: string;
+    RentalInitialValue?: CurrencyAmount;
+    RentalReimbursement?: CurrencyAmount;
+    RentalTaxWithheldList?: Array<TaxWithheldComponent>;
+};
+export type RetrochargeEvent = {
+    RetrochargeEventType?: 'Retrocharge' | 'RetrochargeReversal';
+    AmazonOrderId?: string;
+    PostedDate?: string;
+    BaseTax?: CurrencyAmount;
+    ShippingTax?: CurrencyAmount;
+    MarketplaceName?: string;
+    RetrochargeTaxWithheldComponentList?: Array<TaxWithheldComponent>;
+};
+export type SAFETReimbursementEvent = {
+    PostedDate?: string;
+    SAFETClaimId?: string;
+    ReimbursedAmount?: CurrencyAmount;
+    SAFETReimbursementItemList?: Array<SAFETReimbursementItem>;
+};
+export type SAFETReimbursementItem = {
+    ItemChargeList?: Array<ChargeComponent>;
+};
+export type SellerReviewEnrollmentPaymentEvent = {
+    PostedDate?: string;
+    EnrollmentId?: string;
+    ParentASIN?: string;
+    FeeComponent?: FeeComponent;
+    ChargeComponent?: ChargeComponent;
+    TotalAmount?: CurrencyAmount;
+};
+export type ServiceFeeEvent = {
+    AmazonOrderId?: string;
+    FeeReason?: string;
+    FeeList?: Array<FeeComponent>;
+    SellerSKU?: string;
+    FnSKU?: string;
+    FeeDescription?: string;
+    ASIN?: string;
+};
+export type ShipmentEvent = {
+    AmazonOrderId?: string;
+    SellerOrderId?: string;
+    MarketplaceName?: string;
+    OrderChargeList?: Array<ChargeComponent>;
+    OrderChargeAdjustmentList?: Array<ChargeComponent>;
+    ShipmentFeeList?: Array<FeeComponent>;
+    ShipmentFeeAdjustmentList?: Array<FeeComponent>;
+    OrderFeeList?: Array<FeeComponent>;
+    OrderFeeAdjustmentList?: Array<FeeComponent>;
+    DirectPaymentList?: Array<DirectPayment>;
+    PostedDate?: string;
+    ShipmentItemList?: Array<ShipmentItem>;
+    ShipmentItemAdjustmentList?: Array<ShipmentItem>;
+};
+export type ShipmentItem = {
+    SellerSKU?: string;
+    OrderItemId?: string;
+    OrderAdjustmentItemId?: string;
+    QuantityShipped?: number;
+    ItemChargeList?: Array<ChargeComponent>;
+    ItemTaxWithheldList?: Array<TaxWithheldComponent>;
+    ItemChargeAdjustmentList?: Array<ChargeComponent>;
+    ItemFeeList?: Array<FeeComponent>;
+    ItemFeeAdjustmentList?: Array<FeeComponent>;
+    PromotionList?: Array<Promotion>;
+    PromotionAdjustmentList?: Array<Promotion>;
+    CostOfPointsGenerated?: CurrencyAmount;
+    CostOfPointsReturned?: CurrencyAmount;
+};
+export type SolutionProviderCreditEvent = {
+    ProviderTransactionType?: 'ProviderCredit' | 'ProviderCreditReversal';
+    SellerOrderId?: string;
+    MarketplaceId?: string;
+    MarketplaceCountryCode?: string;
+    SellerId?: string;
+    SellerStoreName?: string;
+    ProviderId?: string;
+    ProviderStoreName?: string;
+};
+export type TDSReimbursementEvent = {
+    PostedDate?: string;
+    TdsOrderId?: string;
+    ReimbursedAmount?: CurrencyAmount;
+};
+export type TaxWithheldComponent = {
+    TaxCollectionModel?: 'MarketplaceFacilitator' | 'Standard';
+    TaxesWithheld?: Array<ChargeComponent>;
+};
