@@ -1,10 +1,11 @@
 export type DateTime = string;
 // https://docs.developer.amazonservices.com/en_UK/easy_ship/EasyShip_Datatypes.html
 export type Dimensions = {
+    // Dimensions is also defined in FBA Inbound.
     Length: number;
     Width: number;
     Height: number;
-    Unit: 'cm'; // TODO: is 'cm' really the only valid option? that's what the docs indicate.
+    Unit: 'cm' | 'inches' | 'centimeters'; // cm in EasyShip, inches and centimeters in FBA Inbound
     Name?: string;
 };
 export type InvoiceData = {
@@ -20,8 +21,9 @@ export type ScheduledPackageId = {
     PackageId?: string;
 };
 export type Weight = {
+    // Weight is also defined in FBA Inbound.
     Value: number;
-    Unit: 'g'; // TODO: is 'g' really the only valid option? that's what the docs indicate.
+    Unit: 'g' | 'pounds' | 'kilograms'; // 'g' in EasyShip, pounds and kilograms in FBA Inbound
 };
 export type PickupSlot = {
     SlotId: string;
@@ -229,7 +231,7 @@ export type FinancialEvents = {
 export type ImagingServicesFeeEvent = {
     ImagingRequestBillingItemID?: string;
     ASIN?: string;
-    PostedDate?: string;
+    PostedDate?: DateTime;
     FeeList?: Array<FeeComponent>
 };
 export type LoanServicingEvent = {
@@ -237,7 +239,7 @@ export type LoanServicingEvent = {
     SourceBusinessEventType?: 'LoanAdvance' | 'LoanPayment' | 'LoanRefund';
 };
 export type NetworkComminglingTransactionEvent = {
-    PostedDate?: string;
+    PostedDate?: DateTime;
     NetCoTransactionID?: string;
     SwapReason?: string;
     TransactionType?: 'NetCo' | 'ComminglingVAT';
@@ -248,7 +250,7 @@ export type NetworkComminglingTransactionEvent = {
 };
 export type PayWithAmazonEvent = {
     SellerOrderId?: string;
-    TransactionPostedDate?: string;
+    TransactionPostedDate?: DateTime;
     BusinessObjectType?: 'PaymentContract';
     SalesChannel?: string;
     Charge?: ChargeComponent;
@@ -260,7 +262,7 @@ export type PayWithAmazonEvent = {
 };
 export type ProductAdsPaymentEvent = {
     // TODO: documentation shows these camelCased?! is that for real?
-    postedDate?: string; // TODO: should dates be a type DateTime ?
+    postedDate?: DateTime;
     transactionType?: 'charge' | 'refund';
     invoiceId?: string;
     baseValue?: CurrencyAmount;
@@ -283,7 +285,7 @@ export type RentalTransactionEvent = {
     | 'RentalChargeFailureReimbursement'
     | 'RentalLostItemReimbursement';
     ExtensionLength?: number;
-    PostedDate?: string;
+    PostedDate?: DateTime;
     RentalChargeList?: Array<ChargeComponent>;
     RentalFeeList?: Array<FeeComponent>;
     MarketplaceName?: string;
@@ -294,14 +296,14 @@ export type RentalTransactionEvent = {
 export type RetrochargeEvent = {
     RetrochargeEventType?: 'Retrocharge' | 'RetrochargeReversal';
     AmazonOrderId?: string;
-    PostedDate?: string;
+    PostedDate?: DateTime;
     BaseTax?: CurrencyAmount;
     ShippingTax?: CurrencyAmount;
     MarketplaceName?: string;
     RetrochargeTaxWithheldComponentList?: Array<TaxWithheldComponent>;
 };
 export type SAFETReimbursementEvent = {
-    PostedDate?: string;
+    PostedDate?: DateTime;
     SAFETClaimId?: string;
     ReimbursedAmount?: CurrencyAmount;
     SAFETReimbursementItemList?: Array<SAFETReimbursementItem>;
@@ -310,7 +312,7 @@ export type SAFETReimbursementItem = {
     ItemChargeList?: Array<ChargeComponent>;
 };
 export type SellerReviewEnrollmentPaymentEvent = {
-    PostedDate?: string;
+    PostedDate?: DateTime;
     EnrollmentId?: string;
     ParentASIN?: string;
     FeeComponent?: FeeComponent;
@@ -337,7 +339,7 @@ export type ShipmentEvent = {
     OrderFeeList?: Array<FeeComponent>;
     OrderFeeAdjustmentList?: Array<FeeComponent>;
     DirectPaymentList?: Array<DirectPayment>;
-    PostedDate?: string;
+    PostedDate?: DateTime;
     ShipmentItemList?: Array<ShipmentItem>;
     ShipmentItemAdjustmentList?: Array<ShipmentItem>;
 };
@@ -367,7 +369,7 @@ export type SolutionProviderCreditEvent = {
     ProviderStoreName?: string;
 };
 export type TDSReimbursementEvent = {
-    PostedDate?: string;
+    PostedDate?: DateTime;
     TdsOrderId?: string;
     ReimbursedAmount?: CurrencyAmount;
 };
@@ -375,3 +377,329 @@ export type TaxWithheldComponent = {
     TaxCollectionModel?: 'MarketplaceFacilitator' | 'Standard';
     TaxesWithheld?: Array<ChargeComponent>;
 };
+
+// https://docs.developer.amazonservices.com/en_UK/fba_inbound/FBAInbound_Datatypes.html
+export type Address = {
+    Name: string; // max 50 char
+    AddressLine1: string; // max 180 char
+    AddressLine2?: string; // max 60 char
+    City: string; // max 30 char
+    DistrictOrCounty?: string; // max 25 char
+    StateOrProvinceCode?: string; // max 2 char
+    CountryCode: string; // max 2 char, ISO-3166-1 alpha-2
+    PostalCode?: string; // max 30 char
+};
+export type PrepInstruction = 'Polybagging' | 'BubbleWrapping' | 'Taping' | 'BlackShrinkWrapping' | 'Labeling' | 'HangGarment';
+export type Amount = {
+    CurrencyCode: 'USD' | 'GBP';
+    Value: string;
+};
+export type AmazonPrepFeesDetails = {
+    PrepInstruction: PrepInstruction;
+    FeePerUnit: Amount;
+};
+export type InboundGuidance = 'InboundNotRecommended' | 'InboundOK';
+export type GuidanceReason = 'SlowMovingASIN' | 'NoApplicableGuidance';
+export type ASINInboundGuidance = {
+    ASIN: string;
+    InboundGuidance: InboundGuidance;
+    GuidanceReasonList?: Array<GuidanceReason>;
+};
+export type ASINPrepInstructions = {
+    // TODO: documentation does not have a "Required" field as most do
+    ASIN: string;
+    BarcodeInstruction?: 'RequiresFNSKULabel' | 'MustProvideSellerSKU';
+    PrepGuidance: 'ConsultHelpDocuments' | 'NoAdditionalPrepRequired' | 'SeePrepInstructionsList';
+    PrepInstructionList?: Array<PrepInstruction>;
+};
+export type BoxContentsFeeDetails = {
+    TotalUnits?: number;
+    FeePerUnit?: Amount;
+    TotalFee?: Amount;
+};
+export type BoxContentsSource = 'NONE' | 'FEED' | '2D_BARCODE' | 'INTERACTIVE';
+export type Contact = {
+    Name: string; // 50 char
+    Phone: string; // 20 char
+    Email: string; // 50 char
+    Fax: string; // 20 char
+};
+export type InboundShipmentHeader = {
+    ShipmentName: string;
+    ShipFromAddress: Address;
+    DestinationFulfillmentCenterId: string;
+    LabelPrepPreference: 'SELLER_LABEL' | 'AMAZON_LABEL_ONLY' | 'AMAZON_LABEL_PREFERRED';
+    AreCasesRequired?: boolean; // TODO: should this be a string true | false ?
+    ShipmentStatus: 'WORKING' | 'SHIPPED' | 'CANCELLED';
+    IntendedBoxContentsSource?: BoxContentsSource;
+};
+export type InboundShipmentInfo = {
+    ShipmentId?: string;
+    ShipmentName?: string;
+    ShipFromAddress: Address;
+    DestinationFulfillmentCenterId?: string;
+    LabelPrepType?: 'NO_LABEL' | 'SELLER_LABEL' | 'AMAZON_LABEL';
+    ShipmentStatus?: 'WORKING' | 'SHIPPED' | 'IN_TRANSIT' | 'DELIVERED' | 'CHECKED_IN' | 'RECEIVING' | 'CLOSED' | 'CANCELLED' | 'DELETED' | 'ERROR';
+    AreCasesRequired: boolean; // TODO: should this be a string true | false ?
+    ConfirmedNeedByDate?: string; // YYYY-MM-DD, only valid in India and Japan
+    BoxContentsSource?: BoxContentsSource;
+    EstimatedBoxContentsFee?: BoxContentsFeeDetails;
+};
+export type InboundShipmentItem = {
+    ShipmentId?: string;
+    SellerSKU: string;
+    FulfillmentNetworkSKU?: string;
+    QuantityShipped: number;
+    QuantityReceived?: number;
+    QuantityInCase?: number;
+    PrepDetailsList?: Array<PrepDetails>;
+    ReleaseDate?: string // YYYY-MM-DD
+};
+export type InboundShipmentPlan = {
+    ShipmentId: string;
+    DestinationFulfillmentCenterId: string;
+    ShipToAddress: Address;
+    LabelPrepType: 'NO_LABEL' | 'SELLER_LABEL' | 'AMAZON_LABEL'; // TODO: this sequence is used in multiple places, combine them into a single type
+    Items: InboundShipmentPlanItem;
+    EstimatedBoxContentsFee?: BoxContentsFeeDetails;
+};
+export type InboundShipmentPlanItem = {
+    SellerSKU: string;
+    FulfillmentNetworkSKU: string;
+    Quantity: number;
+    PrepDetailsList?: Array<PrepDetails>;
+};
+export type InboundShipmentPlanRequestItem = {
+    SellerSKU: string;
+    ASIN?: string;
+    Condition?:
+    | 'NewItem'
+    | 'NewWithWarranty'
+    | 'NewOEM'
+    | 'NewOpenBox'
+    | 'UsedLikeNew'
+    | 'UsedVeryGood'
+    | 'UsedGood'
+    | 'UsedAcceptable'
+    | 'UsedPoor'
+    | 'UsedRefurbished'
+    | 'CollectibleLikeNew'
+    | 'CollectibleVeryGood'
+    | 'CollectibleGood'
+    | 'CollectibleAcceptable'
+    | 'CollectiblePoor'
+    | 'RefurbishedWithWarranty'
+    | 'Refurbished'
+    | 'Club';
+    Quantity: number;
+    QuantityInCase?: number;
+    PrepDetailsList?: Array<PrepDetails>;
+};
+export type InvalidASIN = {
+    ASIN: string;
+    ErrorReason: 'DoestNotExist';
+};
+export type InvalidSKU = {
+    SellerSKU: string;
+    ErrorReason: 'DoesNotExist';
+};
+export type NonPartneredLtlDataInput = {
+    CarrierName:
+    // UK
+    | 'BUSINESS_POST'
+    | 'DHL_AIRWAYS_INC'
+    | 'DHL_UK'
+    | 'PARCELFORCE'
+    | 'DPD'
+    | 'TNT_LOGISTICS_CORPORATION'
+    | 'TNT'
+    | 'YODEL'
+    | 'UNITED_PARCEL_SERVICE_INC' // UK & US
+    | 'OTHER' // UK & US
+    // US
+    | 'DHL_EXPRESS_USA_INC'
+    | 'FEDERAL_EXPRESS_CORP'
+    | 'UNITED_STATES_POSTAL_SERVICE';
+    ProNumber: string; // max 10
+};
+export type NonPartneredLtlDataOutput = NonPartneredLtlDataInput;
+export type NonPartneredSmallParcelDataInput = {
+    CarrierName: // TODO: this is duplicated, make it a separate type?
+    // UK
+    | 'BUSINESS_POST'
+    | 'DHL_AIRWAYS_INC'
+    | 'DHL_UK'
+    | 'PARCELFORCE'
+    | 'DPD'
+    | 'TNT_LOGISTICS_CORPORATION'
+    | 'TNT'
+    | 'YODEL'
+    | 'UNITED_PARCEL_SERVICE_INC' // UK & US
+    | 'OTHER' // UK & US
+    // US
+    | 'DHL_EXPRESS_USA_INC'
+    | 'FEDERAL_EXPRESS_CORP'
+    | 'UNITED_STATES_POSTAL_SERVICE';
+    PackageList: Array<NonPartneredSmallParcelPackageInput>;
+};
+export type NonPartneredSmallParcelDataOutput = {
+    PackageList: Array<NonPartneredSmallParcelPackageOutput>;
+};
+export type NonPartneredSmallParcelPackageInput = {
+    TrackingId: string; // 30
+};
+export type NonPartneredSmallParcelPackageOutput = {
+    CarrierName:
+    // UK
+    | 'BUSINESS_POST'
+    | 'DHL_AIRWAYS_INC'
+    | 'DHL_UK'
+    | 'PARCELFORCE'
+    | 'DPD'
+    | 'TNT_LOGISTICS_CORPORATION'
+    | 'TNT'
+    | 'YODEL'
+    | 'UNITED_PARCEL_SERVICE_INC' // UK & US
+    | 'OTHER' // UK & US
+    // US
+    | 'DHL_EXPRESS_USA_INC'
+    | 'FEDERAL_EXPRESS_CORP'
+    | 'UNITED_STATES_POSTAL_SERVICE';
+    TrackingId: string; // 30
+    PackageStatus: 'SHIPPED' | 'IN_TRANSIT' | 'DELIVERED' | 'CHECKED_IN' | 'RECEIVING' | 'CLOSED';
+};
+export type Pallet = {
+    Dimensions: Dimensions;
+    Weight?: Weight;
+    IsStacked: boolean; // TODO: should this be a string true | false
+};
+export type PartneredEstimate = {
+    Amount?: Amount;
+    ConfirmDeadline?: DateTime;
+    VoidDeadline?: DateTime;
+};
+type FreightClass = '50' | '55' | '60' | '65' | '70' | '77.5' | '85' | '92.5' | '100' | '110' | '125' | '150' | '175' | '200' | '250' | '300' | '400' | '500';
+export interface PartneredLtlDataInput {
+    Contact: Contact;
+    BoxCount: number;
+    SellerFreightClass?: FreightClass;
+    FreightReadyDate: string; // YYYY-MM-DD
+    PalletList?: Array<Pallet>;
+    TotalWeight?: Weight;
+    SellerDeclaredValue?: Amount;
+}
+export interface PartneredLtlDataOutput extends PartneredLtlDataInput {
+    AmazonCalculatedValue?: Amount;
+    PreviewPickupDate: DateTime;
+    PreviewDeliveryDate: DateTime;
+    PreviewFreightClass: FreightClass;
+    AmazonReferenceId: string;
+    IsBillOfLadingAvailable: boolean; // TODO: should this be a string true | false
+    PartneredEstimate: PartneredEstimate;
+    CarrierName: // US carriers only?
+    | 'DHL_EXPRESS_USA_INC'
+    | 'FEDERAL_EXPRESS_CORP'
+    | 'UNITED_STATES_POSTAL_SERVICE'
+    | 'UNITED_PARCEL_SERVICE_INC'
+    | 'OTHER';
+}
+export type PartneredSmallParcelDataInput = {
+    CarrierName?:
+    | 'UNITED_PARCEL_SERVICE_INC' // FR, IT, ES, UK, US, DE
+    | 'DHL_STANDARD'; // DE
+    PackageList: Array<PartneredSmallParcelPackageInput>;
+};
+export type PartneredSmallParcelDataOutput = {
+    PackageList: Array<PartneredSmallParcelPackageOutput>;
+    PartneredEstimate?: PartneredEstimate;
+};
+export type PartneredSmallParcelPackageInput = {
+    Dimensions: Dimensions;
+    Weight: Weight;
+};
+export type PartneredSmallParcelPackageOutput = {
+    Dimensions: Dimensions;
+    Weight: Weight;
+    TrackingId: string; // 30
+    PackageStatus: 'SHIPPED' | 'IN_TRANSIT' | 'DELIVERED' | 'CHECKED_IN' | 'RECEIVING' | 'CLOSED';
+    CarrierName: string;
+};
+export type PrepDetails = {
+    PrepInstruction: PrepInstruction;
+    PrepOwner: 'AMAZON' | 'SELLER';
+};
+export type SKUInboundGuidance = {
+    SellerSKU: string;
+    ASIN: string;
+    InboundGuidance: InboundGuidance;
+    GuidanceReasonList?: Array<GuidanceReason>;
+};
+export type SKUPrepInstructions = {
+    // TODO: this one does not have an optional field in docs
+    SellerSKU: string;
+    ASIN: string;
+    BarcodeInstruction: 'RequiresFNSKULabel' | 'CanUseOriginalBarcode';
+    PrepGuidance: 'ConsultHelpDocuments' |'NoAdditionalPrepRequired' | 'SeePrepInstructionsList';
+    PrepInstructionList?: Array<PrepInstruction>;
+    AmazonPrepFeesDetails: Array<AmazonPrepFeesDetails>;
+};
+export type TransportContent = {
+    TransportHeader: TransportHeader;
+    TransportDetails: TransportDetailOutput;
+    TransportResult: TransportResult;
+};
+export type TransportDetailInput = {
+    PartneredSmallParcelData?: PartneredSmallParcelDataInput;
+    NonPartneredSmallParcelData?: NonPartneredSmallParcelDataInput;
+    PartneredLtlData?: PartneredLtlDataInput;
+    NonPartneredLtlData?: NonPartneredLtlDataInput;
+};
+export type TransportDetailOutput = {
+    PartneredSmallParcelData?: PartneredSmallParcelDataOutput;
+    NonPartneredSmallParcelData?: NonPartneredSmallParcelDataOutput;
+    PartneredLtlData?: PartneredLtlDataOutput;
+    NonPartneredLtlData?: NonPartneredLtlDataOutput;
+};
+export type TransportDocument = {
+    PdfDocument: string;
+    Checksum: string;
+};
+export type TransportHeader = {
+    SellerId: string;
+    ShipmentId: string;
+    IsPartnered: boolean; // TODO: true | false ?
+    ShipmentType: 'SP' | 'LTL';
+};
+export type TransportResult = {
+    TransportStatus:
+    | 'WORKING'
+    | 'ERROR_ON_ESTIMATING'
+    | 'ESTIMATING'
+    | 'ESTIMATED'
+    | 'ERROR_ON_CONFIRMING'
+    | 'CONFIRMING'
+    | 'CONFIRMED'
+    | 'VOIDING'
+    | 'VOIDED'
+    | 'ERROR_IN_VOIDING';
+};
+
+// https://docs.developer.amazonservices.com/en_UK/fba_inventory/FBAInventory_Datatypes.html
+
+// https://docs.developer.amazonservices.com/en_UK/fba_outbound/FBAOutbound_Datatypes.html
+
+// https://docs.developer.amazonservices.com/en_UK/merch_fulfill/MerchFulfill_Datatypes.html
+
+// https://docs.developer.amazonservices.com/en_UK/orders-2013-09-01/Orders_Datatypes.html
+
+// https://docs.developer.amazonservices.com/en_UK/products/Products_Datatypes.html
+
+// https://docs.developer.amazonservices.com/en_UK/recommendations/Recommendations_Datatypes.html
+
+// https://docs.developer.amazonservices.com/en_UK/reports/Reports_Datatypes.html
+
+// https://docs.developer.amazonservices.com/en_UK/sellers/Sellers_Datatypes.html
+
+// https://docs.developer.amazonservices.com/en_UK/shipment_invoicing/ShipmentInvoicing_Datatypes.html
+
+// https://docs.developer.amazonservices.com/en_UK/subscriptions/Subscriptions_Datatypes.html
