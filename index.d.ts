@@ -13,19 +13,22 @@ export type InvoiceData = {
     InvoiceNumber: string;
     InvoiceDate?: DateTime;
 };
-export type Item = {
-    OrderItemId: string;
-    OrderItemSerialNumberList: string;
-};
+declare namespace EasyShip {
+    // MerchantFulfillment has a completely different Item definition
+    export type Item = {
+        OrderItemId: string;
+        OrderItemSerialNumberList: string;
+    };
+}
 export type ScheduledPackageId = {
     AmazonOrderId: string;
     PackageId?: string;
 };
 // TODO: namespacing?
 export type Weight = {
-    // Weight is also defined in FBA Inbound and in FBA Outbound
+    // Weight is also defined in FBA Inbound and in FBA Outbound and in MerchantFulfillment
     Value: number;
-    Unit: 'g' | 'pounds' | 'kilograms' | 'KG' | 'LB'; // 'g' in EasyShip, pounds and kilograms in FBA Inbound, KG and LB in FBA Outbound
+    Unit: 'g' | 'pounds' | 'kilograms' | 'KG' | 'LB' | 'grams' | 'ounces'; // 'g' in EasyShip, pounds and kilograms in FBA Inbound, KG and LB in FBA Outbound, 'grams' and 'ounces' in MerchantFulfillment
 };
 export type PickupSlot = {
     SlotId: string;
@@ -36,7 +39,7 @@ export type Package = {
     ScheduledPackageId: ScheduledPackageId;
     PackageDimensions: Dimensions;
     PackageWeight: Weight;
-    PackageItemsList?: Array<Item>;
+    PackageItemsList?: Array<EasyShip.Item>;
     PackagePickupSlot: PickupSlot;
     PackageIdentifier?: string;
     Invoice?: InvoiceData;
@@ -45,7 +48,7 @@ export type Package = {
 export type PackageRequestDetails = {
     PackageDimensions?: Dimensions;
     PackageWeight?: Weight;
-    PackageItemList?: Array<Item>;
+    PackageItemList?: Array<EasyShip.Item>;
     PackagePickupSlot: PickupSlot;
     PackageIdentifier?: string;
 };
@@ -877,6 +880,189 @@ export type UnfulfillablePreviewItem = {
 export type UpdateFulfillmentOrderItem = Omit<CreateFulfillmentOrderItem, 'SellerSKU' | 'FulfillmentNetworkSKU'>;
 
 // https://docs.developer.amazonservices.com/en_UK/merch_fulfill/MerchFulfill_Datatypes.html
+
+export type AdditionalInputs = {
+    AdditionalInputFieldName: string; // examples NON_DELIVERABLE_INSTRUCTIONS, SENDER_ADDRESS_TRANSLATED
+    SellerInputDefinition: SellerInputDefinition;
+};
+declare namespace MerchantFulfillment {
+    export type Address = {
+        Name: string;
+        AddressLine1: string;
+        AddressLine2?: string;
+        AddressLine3?: string;
+        DistrictOrCounty?: string;
+        Email: string;
+        City: string;
+        StateOrProvinceCode?: string;
+        PostalCode: string;
+        CountryCode: string;
+        Phone: string;
+    };
+    export type Item = {
+        OrderItemId: string;
+        Quantity: number;
+        ItemWeight?: Weight;
+        ItemDescription?: string;
+        TransparencyCodeList?: TransparencyCodeList;
+        ItemLevelSellerInputsList?: ItemLevelSellerInputsList;
+    };
+}
+export type FileContents = {
+    Contents: string;
+    FileType: 'application/pdf' | 'application/zpl' | 'image/png';
+    Checksum: string;
+};
+export type HazmatType = 'None' | 'LQHazmat';
+export type ItemLevelFieldsList = {
+    Asin: string;
+    AdditionalInputs: AdditionalInputs;
+};
+export type ItemLevelSellerInputsList = {
+    AdditionalSellerInputs: {
+        AdditionalInputFieldName: string; // valid values available via GetAdditionalSellerInputs API
+        AdditionalSellerInput: {
+            DateType: 'String' | 'Boolean' | 'Integer' | 'Timestamp' | 'Address' | 'Weight' | 'Dimension' | 'Currency';
+            ValueAsString?: string;
+            ValueAsBoolean?: boolean; // true | false ?
+            ValueAsInteger?: number;
+            ValueAsTimestamp?: DateTime;
+            ValueAsAddress?: MerchantFulfillment.Address;
+            ValueAsWeight?: Weight;
+            ValueAsDimeison?: Dimensions; // TODO: Dimension? not Dimensions?
+            ValueAsCurrency?: Currency;
+        }
+    }
+};
+export type Label = {
+    CustomTextForLabel?: string;
+    Dimensions: LabelDimensions;
+    FileContents: FileContents;
+    LabelFormat?: string; // get values from GetEligibleShippingServices
+    StandardIForLabel?: string;
+};
+export type LabelCustomization = {
+    CustomTextForLabel?: string;
+    StandardIdForLabel: 'AmazonOrderId';
+};
+export type LabelDimensions = {
+    Length: number;
+    Width: number;
+    Unit: 'inches' | 'centimeters';
+};
+export type PackageDimensions = {
+    Length?: number;
+    Width?: number;
+    Height?: number;
+    Unit?: 'inches' | 'centimeters';
+    PredefinedPackageDimensions?: string; // TODO: has a ton of options, see https://docs.developer.amazonservices.com/en_UK/merch_fulfill/MerchFulfill_PrePackDimenEnum.html
+};
+export type RejectedShippingService = {
+    CarrierName: string;
+    ShippingServiceId: string;
+    RejectionReasonCode: string; // INELIGIBLE, SHIP_DATE_OUT_OF_RANGE, CARRIER_CANNOT_SHIP_TO_POBOX, more?
+    RejectionReasonMessage: string;
+    ShippingServiceName: string;
+};
+export type SellerInputDefinition = {
+    IsRequired: boolean; // true | false ?
+    DataType: 'String' | 'Boolean' | 'Integer' | 'Timestamp' | 'Address'| 'Weight' | 'Dimension' | 'Currency';
+    Constraints: 'ValidationRegEx' | 'ValidationString';
+    InputDisplayText: string;
+    InputTarget?: 'ITEM_LEVEL' | 'SHIPMENT_LEVEL';
+    StoredValue: {
+        DataType: 'String' | 'Boolean' | 'Integer' | 'Timestamp' | 'Address' | 'Weight' | 'Dimension' | 'Currency';
+        ValueAsString?: string;
+        ValueAsBoolean?: boolean;
+        ValueAsInteger?: number;
+        ValueAsTimestamp?: DateTime;
+        ValueAsAddress?: MerchantFulfillment.Address;
+        ValueAsWeight?: Weight;
+        ValueAsDimension?: Dimensions;
+        ValueAsCurrency?: CurrencyAmount;
+    };
+    RestrictedSetValues?: string;
+};
+export type Shipment = {
+    ShipmentId: string;
+    AmazonOrderId: string;
+    SellerOrderId?: string;
+    ItemList: Array<MerchantFulfillment.Item>;
+    ShipFromAddress: MerchantFulfillment.Address;
+    ShipToAddress: MerchantFulfillment.Address;
+    PackageDimensions: PackageDimensions;
+    Weight: Weight;
+    Insurance: CurrencyAmount;
+    ShippingService: ShippingService;
+    Label: Label;
+    Status: 'Purchased' | 'RefundPending' | 'RefundRejected' | 'RefundApplied';
+    TrackingId?: string;
+    CreatedDate: DateTime;
+    LastUpdatedDate?: DateTime;
+};
+export type ShipmentLevelFields = {
+    AdditionalInputFieldName?: 'NON_DELIVERABLE_INSTRUCTIONS' | 'SENDER_ADDRESS_TRANSLATED';
+    SellerInputDefinition?: SellerInputDefinition;
+};
+export type ShipmentLevelSellerInputsList = {
+    AdditionalSellerInputs: {
+        AdditionalInputFieldName: string; // GetAdditionalSellerInputs
+        AdditionalSellerInput: {
+            DataType: 'String' | 'Boolean' | 'Integer' | 'Timestamp' | 'Address' | 'Weight' | 'Dimension' | 'Currency';
+            ValueAsString?: string;
+            ValueAsBoolean?: boolean;
+            ValueAsInteger?: number;
+            ValueAsTimestamp?: DateTime;
+            ValueAsAddress?: MerchantFulfillment.Address;
+            ValueAsWeight?: Weight;
+            ValueAsDimension?: Dimensions;
+            ValueAsCurrency?: CurrencyAmount;
+        }
+    }
+};
+export type ShipmentRequestDetails = {
+    AmazonOrderId: string;
+    SellerOrderId?: string;
+    ItemList: Array<MerchantFulfillment.Item>;
+    ShipFromAddress: MerchantFulfillment.Address;
+    PackageDimensions: PackageDimensions;
+    Weight: Weight;
+    MustArriveByDate?: DateTime;
+    ShipDate?: DateTime;
+    ShippingServiceOptions: ShippingServiceOptions;
+    LabelCustomization: LabelCustomization;
+};
+export type ShippingOfferingFilter = {
+    IncludeComplexShippingOptions?: boolean; // true | false ?
+};
+export type ShippingService = {
+    ShippingServiceName: string;
+    CarrierName: string;
+    ShippingServiceId: string;
+    ShippingServiceOfferId: string;
+    ShipDate: DateTime;
+    EarliestEstimatedDeliveryDate?: DateTime;
+    LatestEstimatedDeliveryDate?: DateTime;
+    Rate: CurrencyAmount;
+    ShippingServiceOptions: ShippingServiceOptions;
+    AvailableLabelFormats?: 'PNG' | 'PDF' | 'ZPL203';
+    RequiresAdditionalSellerInputs: boolean; // true | false ?
+};
+export type ShippingServiceOptions = {
+    DeliveryExperience: 'DeliveryConfirmationWithAdultSignature' | 'DeliveryConfirmationWithSignature' | 'DeliveryConfirmationWithoutSignature' | 'NoTracking';
+    DeclaredValue?: CurrencyAmount;
+    CarrierWillPickup: boolean; // true | false ?
+    LabelFormat: string; // GetEligibleShippingServices.AvailableLabelFormats
+};
+export type TemporarilyUnavailableCarrier = {
+    CarrierName: string;
+};
+export type TermsAndConditionsNotAcceptedCarrier = {
+    CarrierName: string;
+};
+export type TransparencyCodeList = {
+    TransparencyCode: string;
+};
 
 // https://docs.developer.amazonservices.com/en_UK/orders-2013-09-01/Orders_Datatypes.html
 
