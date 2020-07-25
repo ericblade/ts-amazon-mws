@@ -1,5 +1,6 @@
 export type DateTime = string;
 // https://docs.developer.amazonservices.com/en_UK/easy_ship/EasyShip_Datatypes.html
+// TODO: If namespacing for units that are declared differently in different sections is viable, then we should do that
 export type Dimensions = {
     // Dimensions is also defined in FBA Inbound.
     Length: number;
@@ -20,10 +21,11 @@ export type ScheduledPackageId = {
     AmazonOrderId: string;
     PackageId?: string;
 };
+// TODO: namespacing?
 export type Weight = {
-    // Weight is also defined in FBA Inbound.
+    // Weight is also defined in FBA Inbound and in FBA Outbound
     Value: number;
-    Unit: 'g' | 'pounds' | 'kilograms'; // 'g' in EasyShip, pounds and kilograms in FBA Inbound
+    Unit: 'g' | 'pounds' | 'kilograms' | 'KG' | 'LB'; // 'g' in EasyShip, pounds and kilograms in FBA Inbound, KG and LB in FBA Outbound
 };
 export type PickupSlot = {
     SlotId: string;
@@ -379,16 +381,19 @@ export type TaxWithheldComponent = {
 };
 
 // https://docs.developer.amazonservices.com/en_UK/fba_inbound/FBAInbound_Datatypes.html
-export type Address = {
-    Name: string; // max 50 char
-    AddressLine1: string; // max 180 char
-    AddressLine2?: string; // max 60 char
-    City: string; // max 30 char
-    DistrictOrCounty?: string; // max 25 char
-    StateOrProvinceCode?: string; // max 2 char
-    CountryCode: string; // max 2 char, ISO-3166-1 alpha-2
-    PostalCode?: string; // max 30 char
-};
+declare namespace Inbound {
+    // Inbound and Outbound have different names for their Address object fields, so let's try namespacing them to see if that helps any confusion.
+    export type Address = {
+        Name: string; // max 50 char
+        AddressLine1: string; // max 180 char
+        AddressLine2?: string; // max 60 char
+        City: string; // max 30 char
+        DistrictOrCounty?: string; // max 25 char
+        StateOrProvinceCode?: string; // max 2 char
+        CountryCode: string; // max 2 char, ISO-3166-1 alpha-2
+        PostalCode?: string; // max 30 char
+    };
+}
 export type PrepInstruction = 'Polybagging' | 'BubbleWrapping' | 'Taping' | 'BlackShrinkWrapping' | 'Labeling' | 'HangGarment';
 export type Amount = {
     CurrencyCode: 'USD' | 'GBP';
@@ -426,7 +431,7 @@ export type Contact = {
 };
 export type InboundShipmentHeader = {
     ShipmentName: string;
-    ShipFromAddress: Address;
+    ShipFromAddress: Inbound.Address;
     DestinationFulfillmentCenterId: string;
     LabelPrepPreference: 'SELLER_LABEL' | 'AMAZON_LABEL_ONLY' | 'AMAZON_LABEL_PREFERRED';
     AreCasesRequired?: boolean; // TODO: should this be a string true | false ?
@@ -436,7 +441,7 @@ export type InboundShipmentHeader = {
 export type InboundShipmentInfo = {
     ShipmentId?: string;
     ShipmentName?: string;
-    ShipFromAddress: Address;
+    ShipFromAddress: Inbound.Address;
     DestinationFulfillmentCenterId?: string;
     LabelPrepType?: 'NO_LABEL' | 'SELLER_LABEL' | 'AMAZON_LABEL';
     ShipmentStatus?: 'WORKING' | 'SHIPPED' | 'IN_TRANSIT' | 'DELIVERED' | 'CHECKED_IN' | 'RECEIVING' | 'CLOSED' | 'CANCELLED' | 'DELETED' | 'ERROR';
@@ -458,7 +463,7 @@ export type InboundShipmentItem = {
 export type InboundShipmentPlan = {
     ShipmentId: string;
     DestinationFulfillmentCenterId: string;
-    ShipToAddress: Address;
+    ShipToAddress: Inbound.Address;
     LabelPrepType: 'NO_LABEL' | 'SELLER_LABEL' | 'AMAZON_LABEL'; // TODO: this sequence is used in multiple places, combine them into a single type
     Items: InboundShipmentPlanItem;
     EstimatedBoxContentsFee?: BoxContentsFeeDetails;
@@ -683,6 +688,193 @@ export type Timepoint = {
 
 
 // https://docs.developer.amazonservices.com/en_UK/fba_outbound/FBAOutbound_Datatypes.html
+
+declare namespace Outbound {
+    export type Address = {
+        Name: string; // 50
+        Line1: string; // 60
+        Line2?: string; // 60
+        Line3?: string; // 60
+        DistrictOrCounty?: string; // 150
+        City?: string; // 50 "required except in JP, do not use in JP"
+        StateOrProvinceCode: string; // 150
+        CountryCode: string; // 2
+        PostalCode?: string; // 20
+        PhoneNumber?: string; // 20
+    };
+}
+
+export type CODSettings = {
+    IsCODRequired?: boolean; // true | false ?
+    CODCharge?: Currency;
+    CODChargeTax?: Currency;
+    ShippingCharge?: Currency;
+    ShippingChargeTax?: Currency;
+};
+export interface CreateFulfillmentOrderItem {
+    SellerSKU: string; // 50
+    SellerFulfillmentOrderItemId: string; // 50
+    Quantity: number;
+    GiftMessage?: string; // 512
+    DisplayableComment?: string; // 250
+    FulfillmentNetworkSKU?: string;
+    PerUnitDeclaredValue?: Currency;
+    PerUnitPrice?: Currency;
+    PerUnitTax?: Currency;
+}
+export type CreateReturnItem = {
+    SellerReturnItemId: string; // 80
+    SellerFulfillmentOrderItemId: string;
+    AmazonShipmentId: string;
+    ReturnReasonCode: string;
+    ReturnComment?: string; // 1000
+};
+export type Currency = {
+    CurrencyCode: string; // 3
+    Value: string;
+};
+export type DeliveryWindow = {
+    StartDateTime: DateTime;
+    EndDateTime: DateTime;
+};
+export type Fee = {
+    Name: 'FBAPerUnitFulfillmentFee' | 'FBAPerOrderFulfillmentFee' | 'FBATransportationFee' | 'FBAFulfillmentCODFee';
+    Amount: Currency;
+};
+type ShippingSpeedCategory = 'Standard' | 'Expedited' | 'Priority' | 'ScheduledDelivery';
+export type FulfillmentOrder = {
+    SellerFulfillmentOrderId: string;
+    MarketplaceId: string; // TODO: might be able to fill this with valid values
+    DisplayableOrderId: string;
+    DisplayableOrderDateTime: DateTime;
+    DisplayableOrderComment: string;
+    ShippingSpeedCategory: ShippingSpeedCategory;
+    DeliveryWindow: DeliveryWindow;
+    DestinationAddress: Outbound.Address;
+    FulfillmentAction?: 'Ship' | 'Hold';
+    FulfillmentPolicy?: 'FillOrKill' | 'FillAll' | 'FillAllAvailable';
+    ReceivedDateTime: DateTime;
+    FulfillmentOrderStatus: 'RECEIVED' | 'INVALID' | 'PLANNING' | 'PROCESSING' | 'CANCELLED' | 'COMPLETE' | 'COMPLETE_PARTIALLED' | 'UNFULFILLABLE';
+    StatusUpdatedDateTime: DateTime;
+    NotificationEmailList?: string;
+    CODSettings?: CODSettings;
+};
+export interface FulfillmentOrderItem extends CreateFulfillmentOrderItem {
+    CancelledQuantity: number;
+    UnfulfillableQuantity: number;
+    EstimatedShipDateTime?: DateTime;
+    EstimatedArrivalDateTime?: DateTime;
+}
+export type FulfillmentPreview = {
+    ShippingSpeedCategory: ShippingSpeedCategory;
+    IsFulfillable: boolean; // true | false ?
+    IsCODCapable: boolean; // true | false ? // TODO: this says "only available in JP" so it might need to be optional? not sure
+    MarketplaceId: string;
+    EstimatedShippingWeight?: Weight;
+    EstimatedFees?: Array<Fee>;
+    FulfillmentPreviewShipments?: Array<FulfillmentPreviewShipment>;
+    UnfulfillablePreviewItems?: Array<UnfulfillablePreviewItems>;
+    OrderUnfulfillableReasons?: Array<'DeliverySLAUnavailable' | 'InvalidDestinationAddress'>; // TODO: There may be other error codes, those are listed as "examples" not "valid values"
+    ScheduledDeliveryInfo?: ScheduledDeliveryInfo;
+};
+export type FulfillmentPreviewItem = {
+    SellerSKU: string;
+    SellerFulfillmentOrderItemId: string;
+    Quantity: number;
+    EstimatedShippingWeight?: Weight;
+    ShippingWeightCalculationMethod?: 'Package' | 'Dimensional';
+};
+export type FulfillmentPreviewShipment = {
+    EarliestShipDate: DateTime;
+    LatestShipDate: DateTime;
+    EarliestArrivalDate: DateTime;
+    LatestArrivalDate: DateTime;
+    FulfillmentPreviewItems: Array<FulfillmentPreviewItem>;
+};
+export type FulfillmentShipment = {
+    AmazonShipmentId: string;
+    FulfillmentCenterId: string;
+    FulfillmentShipmentStatus: 'PENDING' | 'SHIPPED' | 'CANCELLED_BY_FULFILLER' | 'CANCELLED_BY_SELLER';
+    ShippingDateTime?: DateTime;
+    EstimatedArrivalDateTime?: DateTime;
+    FulfillmentShipmentItem: Array<FulfillmentShipmentItem>;
+    FulfillmentShipmentPackage: Array<FulfillmentShipmentPackage>;
+};
+export type FulfillmentShipmentItem = {
+    SellerSKU?: string;
+    SellerFulfillmentOrderItemId: string;
+    Quantity: number;
+    PackageNumber?: number;
+};
+export type FulfillmentShipmentPackage = {
+    PackageNumber: number;
+    CarrierCode: string;
+    TrackingNumber?: string;
+    EstimatedArrivalDateTime?: DateTime;
+};
+export type GetFulfillmentPreviewItem = {
+    SellerSKU: string;
+    SellerFulfillmentOrderItemId: string;
+    Quantity: number;
+};
+export type InvalidItemReasonCode = 'InvalidValues' | 'DuplicateRequest' | 'NoCompletedShipItems' | 'NoReturnableQuantity';
+export type InvalidItemReason = {
+    InvalidItemReasonCode: InvalidItemReasonCode;
+    Description: string;
+};
+export type InvalidReturnItem = {
+    SellerReturnItemId: string;
+    SellerFulfillmentOrderItemId: string;
+    InvalidItemReason: InvalidItemReason;
+};
+export type ReasonCodeDetails = {
+    ReturnReasonCode: string;
+    Description: string;
+    TranslatedDescription?: string;
+};
+export type ReturnAuthorization = {
+    ReturnAuthorizationId: string;
+    FulfillmentCenterId: string;
+    ReturnToAddress: PaymentAddress;
+    AmazonRmaId: string;
+    RmaPageURL: string;
+};
+export type ReturnItem = {
+    SellerReturnItemId: string;
+    SellerFulfillmentOrderItemId: string;
+    AmazonShipmentId: string;
+    SellerReturnReasonCode: string;
+    ReturnComment?: string;
+    AmazonReturnReasonCode?: string;
+    Status: Status;
+    StatusChangedDate: DateTime;
+    ReturnAuthorizationId?: string;
+    ReturnReceivedCondition?: ReturnReceivedCondition;
+    FulfillmentCenterId?: string;
+};
+export type ReturnReceivedCondition = 'CarrierDamaged' | 'CustomerDamaged' | 'Defective' | 'FulfillerDamaged' | 'Sellable';
+export type ScheduledDeliveryInfo = {
+    DeliveryTimeZone: string;
+    DeliveryWindows: Array<DeliveryWindow>;
+};
+export type Status = 'New' | 'Processed';
+export type TrackingAddress = {
+    City: string;
+    State: string;
+    Country: string;
+};
+export type TrackingEvent = {
+    EventDate: string;
+    EventAddress: TrackingAddress;
+    EventCode: string; // TODO: This is a disgustingly long list of strings that are "EVENT_###" where ### is a number from 101 to 419, and the only explanation is in the doc page.
+};
+export type UnfulfillablePreviewItem = {
+    SellerSKU: string;
+    SellerFulfillmentOrderItemId: string;
+    Quantity: number;
+    ItemUnfulfillableReasons?: 'InventoryUnavailable' | 'NoDeliveryOption'; // TODO: there may be more here but that's documented as "examples" not valid values.
+};
+export type UpdateFulfillmentOrderItem = Omit<CreateFulfillmentOrderItem, 'SellerSKU' | 'FulfillmentNetworkSKU'>;
 
 // https://docs.developer.amazonservices.com/en_UK/merch_fulfill/MerchFulfill_Datatypes.html
 

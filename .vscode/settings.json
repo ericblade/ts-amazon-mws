@@ -5,9 +5,11 @@
         "FNSKU",
         "Giftwrap",
         "PARCELFORCE",
+        "PARTIALLED",
         "Polybagging",
         "Retrocharge",
         "SAFET",
-        "Timepoint"
+        "Timepoint",
+        "namespacing"
     ]
 }
