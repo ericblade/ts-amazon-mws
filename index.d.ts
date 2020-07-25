@@ -1066,6 +1066,135 @@ export type TransparencyCodeList = {
 
 // https://docs.developer.amazonservices.com/en_UK/orders-2013-09-01/Orders_Datatypes.html
 
+declare namespace Orders {
+    export type Address = {
+        Name: string;
+        AddressLine1?: string;
+        AddressLine2?: string;
+        AddressLine3?: string;
+        City?: string;
+        Municipality?: string;
+        County?: string;
+        District?: string;
+        StateOrRegion?: string;
+        PostalCode?: string;
+        CountryCode?: string;
+        Phone?: string;
+        AddressType?: 'Commercial' | 'Residential';
+    }
+}
+export type BuyerCustomizedInfo = {
+    CustomizedURL: string;
+};
+export type BuyerTaxInfo = {
+    CompanyLegalName?: string;
+    TaxingRegion?: string;
+    TaxClassifications?: Array<TaxClassification>;
+};
+export type Money = {
+    // Amazon, why oh why, are CurrencyAmount, Currency, and Money, all ever so slightly different?
+    CurrencyCode?: string;
+    Amount?: string;
+};
+export type Order = {
+    AmazonOrderId: string;
+    SellerOrderId?: string;
+    PurchaseDate: DateTime;
+    LastUpdateDate: DateTime;
+    OrderStatus: string; // TODO: not sure what valid values are here, not in docs
+    FulfillmentChannel?: 'AFN' | 'MFN';
+    SalesChannel?: string;
+    OrderChannel?: string;
+    ShipServiceLevel?: string;
+    ShippingAddress?: Orders.Address;
+    OrderTotal?: Money;
+    NumberOfItemsShipped: number;
+    NumberOfItemsUnshipped: number;
+    PaymentExecutionDetail?: Array<PaymentExecutionDetailItem>;
+    PaymentMethod?: 'COD' | 'CVS' | 'Other';
+    PaymentMethodDetails?: PaymentMethodDetails;
+    IsReplacementOrder?: boolean; // true | false ?
+    ReplacedOrderId?: string;
+    MarketplaceId?: string;
+    BuyerEmail?: string;
+    BuyerName?: string;
+    BuyerCountry?: string;
+    BuyerTaxInfo?: BuyerTaxInfo;
+    ShipmentServiceLevelCategory?: 'Expedited' | 'FreeEconomy' | 'NextDay' | 'SameDay' | 'SecondDay' | 'Scheduled' | 'Standard'; // TODO: isn't servicelevel used elsewhere, but the docs didn't have a list< but this one does? should use it.
+    EasyShipShipmentStatus?: 'PendingPickUp' | 'LabelCanceled' | 'PickedUp' | 'OutForDelivery' | 'Damaged' | 'Delivered' | 'RejectedByBuyer' | 'Undeliverable' | 'ReturnedToSeller' | 'ReturningToSeller';
+    OrderType?: 'StandardOrder' | 'Preorder' | 'SourcingOnDemandOrder';
+    EarliestShipDate?: DateTime;
+    LatestShipDate?: DateTime;
+    EarliestDeliveryDate?: DateTime;
+    LatestDeliveryDate?: DateTime;
+    IsBusinessOrder?: boolean; // true | false ?
+    IsSoldByAB?: boolean; // true | false ?
+    PurchaseOrderNumber?: string;
+    IsPrime?: boolean; // true | false ?
+    IsPremiumOrder?: boolean; // true | false ?
+    IsGlobalExpressEnabled?: boolean; // true | false ?
+    PromiseResponseDueDate?: DateTime;
+    IsEstimatedShipDateSet?: boolean; // true | false ?
+};
+export type OrderItem = {
+    ASIN: string;
+    OrderItemId: string;
+    SellerSKU?: string;
+    BuyerCustomizedInfo?: BuyerCustomizedInfo;
+    Title?: string;
+    QuantityOrdered: number;
+    QuantityShipped?: number;
+    PointsGranted?: PointsGranted;
+    ProductInfo?: ProductInfo;
+    ItemPrice?: Money;
+    ShippingPrice?: Money;
+    GiftWrapPrice?: Money;
+    TaxCollection?: TaxCollection;
+    ItemTax?: Money;
+    ShippingTax?: Money;
+    GiftWrapTax?: Money;
+    ShippingDiscount?: Money;
+    ShippingDiscountTax?: Money;
+    PromotionDiscount?: Money;
+    PromotionDiscountTax?: Money;
+    PromotionIds?: Array<string>;
+    CODFee?: Money;
+    CODFeeDiscount?: Money;
+    IsGift?: boolean; // true | false ?
+    GiftMessageText?: string;
+    GiftWrapLevel?: string;
+    ConditionNote?: string;
+    ConditionId?: 'New' | 'Used' | 'Collectible' | 'Refurbished' | 'Preorder' | 'Club';
+    ConditionSubtypeId?: 'New' | 'Mint' | 'Very Good' | 'Good' | 'Acceptable' | 'Poor' | 'Club' | 'OEM' | 'Warranty' | 'Refurbished Warranty' | 'Refurbished' | 'Open Box' | 'Any' | 'Other';
+    ScheduledDeliveryStartDate?: DateTime;
+    ScheduledDeliveryEndDate?: DateTime;
+    PriceDesignation?: 'BusinessPrice';
+    IsTransparency?: boolean; // true | false ?
+    SerialNumberRequired?: boolean; // true | false ?
+};
+export type PaymentExecutionDetailItem = {
+    Payment: Money;
+    PaymentMethod: 'COD' | 'GC' | 'PointsAccount'; // TODO: All of these values are only available in JP. Docs say it's not optional. What?
+};
+export type PaymentMethodDetails = {
+    PaymentMethodDetail?: string; // GiftCertificate | CreditCard | ????
+};
+export type ProductInfo = {
+    NumberOfItems?: number;
+};
+export type PointsGranted = {
+    PointsNumber?: number;
+    PointsMonetaryValue?: Money;
+};
+export type TaxClassification = {
+    Name: string;
+    Value: string;
+};
+export type TaxCollection = {
+    Model: 'MarketplaceFacilitator'; // TODO: are other values possible?!
+    ResponsibleParty: 'Amazon Services, Inc.'; // TODO: are other values possible?!
+};
+
 // https://docs.developer.amazonservices.com/en_UK/products/Products_Datatypes.html
 
 // https://docs.developer.amazonservices.com/en_UK/recommendations/Recommendations_Datatypes.html
