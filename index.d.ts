@@ -469,28 +469,30 @@ export type InboundShipmentPlanItem = {
     Quantity: number;
     PrepDetailsList?: Array<PrepDetails>;
 };
+type ItemConditions =
+| 'NewItem'
+| 'NewWithWarranty'
+| 'NewOEM'
+| 'NewOpenBox'
+| 'UsedLikeNew'
+| 'UsedVeryGood'
+| 'UsedGood'
+| 'UsedAcceptable'
+| 'UsedPoor'
+| 'UsedRefurbished'
+| 'CollectibleLikeNew'
+| 'CollectibleVeryGood'
+| 'CollectibleGood'
+| 'CollectibleAcceptable'
+| 'CollectiblePoor'
+| 'RefurbishedWithWarranty'
+| 'Refurbished'
+| 'Club';
+
 export type InboundShipmentPlanRequestItem = {
     SellerSKU: string;
     ASIN?: string;
-    Condition?:
-    | 'NewItem'
-    | 'NewWithWarranty'
-    | 'NewOEM'
-    | 'NewOpenBox'
-    | 'UsedLikeNew'
-    | 'UsedVeryGood'
-    | 'UsedGood'
-    | 'UsedAcceptable'
-    | 'UsedPoor'
-    | 'UsedRefurbished'
-    | 'CollectibleLikeNew'
-    | 'CollectibleVeryGood'
-    | 'CollectibleGood'
-    | 'CollectibleAcceptable'
-    | 'CollectiblePoor'
-    | 'RefurbishedWithWarranty'
-    | 'Refurbished'
-    | 'Club';
+    Condition?: ItemConditions;
     Quantity: number;
     QuantityInCase?: number;
     PrepDetailsList?: Array<PrepDetails>;
@@ -503,43 +505,29 @@ export type InvalidSKU = {
     SellerSKU: string;
     ErrorReason: 'DoesNotExist';
 };
+type NonPartneredCarriers =
+// UK
+| 'BUSINESS_POST'
+| 'DHL_AIRWAYS_INC'
+| 'DHL_UK'
+| 'PARCELFORCE'
+| 'DPD'
+| 'TNT_LOGISTICS_CORPORATION'
+| 'TNT'
+| 'YODEL'
+| 'UNITED_PARCEL_SERVICE_INC' // UK & US
+| 'OTHER' // UK & US
+// US
+| 'DHL_EXPRESS_USA_INC'
+| 'FEDERAL_EXPRESS_CORP'
+| 'UNITED_STATES_POSTAL_SERVICE';
+
 export type NonPartneredLtlDataInput = {
-    CarrierName:
-    // UK
-    | 'BUSINESS_POST'
-    | 'DHL_AIRWAYS_INC'
-    | 'DHL_UK'
-    | 'PARCELFORCE'
-    | 'DPD'
-    | 'TNT_LOGISTICS_CORPORATION'
-    | 'TNT'
-    | 'YODEL'
-    | 'UNITED_PARCEL_SERVICE_INC' // UK & US
-    | 'OTHER' // UK & US
-    // US
-    | 'DHL_EXPRESS_USA_INC'
-    | 'FEDERAL_EXPRESS_CORP'
-    | 'UNITED_STATES_POSTAL_SERVICE';
-    ProNumber: string; // max 10
+    CarrierName: NonPartneredCarriers;
 };
 export type NonPartneredLtlDataOutput = NonPartneredLtlDataInput;
 export type NonPartneredSmallParcelDataInput = {
-    CarrierName: // TODO: this is duplicated, make it a separate type?
-    // UK
-    | 'BUSINESS_POST'
-    | 'DHL_AIRWAYS_INC'
-    | 'DHL_UK'
-    | 'PARCELFORCE'
-    | 'DPD'
-    | 'TNT_LOGISTICS_CORPORATION'
-    | 'TNT'
-    | 'YODEL'
-    | 'UNITED_PARCEL_SERVICE_INC' // UK & US
-    | 'OTHER' // UK & US
-    // US
-    | 'DHL_EXPRESS_USA_INC'
-    | 'FEDERAL_EXPRESS_CORP'
-    | 'UNITED_STATES_POSTAL_SERVICE';
+    CarrierName: NonPartneredCarriers;
     PackageList: Array<NonPartneredSmallParcelPackageInput>;
 };
 export type NonPartneredSmallParcelDataOutput = {
@@ -549,22 +537,8 @@ export type NonPartneredSmallParcelPackageInput = {
     TrackingId: string; // 30
 };
 export type NonPartneredSmallParcelPackageOutput = {
-    CarrierName:
-    // UK
-    | 'BUSINESS_POST'
-    | 'DHL_AIRWAYS_INC'
-    | 'DHL_UK'
-    | 'PARCELFORCE'
-    | 'DPD'
-    | 'TNT_LOGISTICS_CORPORATION'
-    | 'TNT'
-    | 'YODEL'
-    | 'UNITED_PARCEL_SERVICE_INC' // UK & US
-    | 'OTHER' // UK & US
-    // US
-    | 'DHL_EXPRESS_USA_INC'
-    | 'FEDERAL_EXPRESS_CORP'
-    | 'UNITED_STATES_POSTAL_SERVICE';
+    CarrierName: NonPartneredCarriers;
+
     TrackingId: string; // 30
     PackageStatus: 'SHIPPED' | 'IN_TRANSIT' | 'DELIVERED' | 'CHECKED_IN' | 'RECEIVING' | 'CLOSED';
 };
@@ -685,6 +659,28 @@ export type TransportResult = {
 };
 
 // https://docs.developer.amazonservices.com/en_UK/fba_inventory/FBAInventory_Datatypes.html
+
+export type InventorySupply = {
+    SellerSKU?: string;
+    FNSKU: string;
+    ASIN?: string;
+    Condition?: ItemConditions;
+    TotalSupplyQuantity: number;
+    InStockSupplyQuantity: number;
+    EarliestAvailability?: Timepoint;
+    SupplyDetail?: Array<InventorySupplyDetail>;
+};
+export type InventorySupplyDetail = {
+    Quantity: number;
+    SupplyType: 'InStock' | 'Inbound' | 'Transfer';
+    EarliestAvailableToPick: Timepoint;
+    LatestAvailableToPick: Timepoint;
+};
+export type Timepoint = {
+    TimepointType: 'Immediately' | 'DateTime' | 'Unknown';
+    DateTime?: DateTime;
+};
+
 
 // https://docs.developer.amazonservices.com/en_UK/fba_outbound/FBAOutbound_Datatypes.html
 
