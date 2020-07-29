@@ -1197,6 +1197,102 @@ export type TaxCollection = {
 
 // https://docs.developer.amazonservices.com/en_UK/products/Products_Datatypes.html
 
+export type AvailabilityType = 'NOW' | 'FUTURE_WITHOUT_DATE' | 'FUTURE_WITH_DATE';
+export type BuyBoxPrice = {
+    condition: 'New' | 'Used' | 'Collectible' | 'Refurbished' | 'Club';
+    LandedPrice: MoneyType;
+    ListingPrice: MoneyType;
+    Shipping: MoneyType;
+    Points?: Points;
+};
+export type DetailedShippingTimeType = {
+    minimumHours?: number;
+    maximumHours?: number;
+    availableDate?: DateTime;
+    availabilityType?: AvailabilityType;
+};
+export type FeeDetail = {
+    FeeType: FeeType;
+    FeeAmount: MoneyType;
+    FeePromotion?: MoneyType;
+    TaxAmount?: MoneyType;
+    FinalFee: MoneyType;
+    IncludedFeeDetailList?: Array<FeeDetail>;
+};
+export type FeesEstimate = {
+    TimeOfFeesEstimation: DateTime;
+    TotalFeesEstimate: MoneyType;
+    FeeDetailList: Array<FeeDetail>;
+};
+export interface FeesEstimateIdentifier {
+    MarketplaceId: string;
+    IdType: 'ASIN' | 'SellerSKU';
+    IdValue: string;
+    PriceToEstimateFees: PriceToEstimateFees;
+    IsAmazonFulfilled: boolean; // true | false ?
+    SellerInputIdentifier: string;
+}
+export interface FeesEstimateRequest extends FeesEstimateIdentifier {
+    Identifier: string;
+}
+export type FeesEstimateResult = {
+    FeesEstimateIdentifier: FeesEstimateIdentifier;
+    FeesEstimate?: FeesEstimate;
+    Status: 'Success' | 'ClientError' | 'ServiceError';
+    Error?: {
+        Type: string;
+        Code: string;
+        Message: string;
+    };
+};
+export type FeeType =
+| 'ReferralFee'
+| 'VariableClosingFee'
+| 'PerItemFee'
+| 'FBAFees'
+| 'FBAPickAndPack'
+| 'FBAWeightHandling'
+| 'FBAOrderHandling'
+| 'FBADeliveryServicesFee';
+export type FulfillmentChannelType = 'Amazon' | 'Merchant';
+export type LowestPrice = { // TODO: this has a virtually identical shape to something above, can we consolidate?
+    condition: 'New' | 'Used' | 'Collectible' | 'Refurbished' | 'Club'; // TODO: this is used in multiple places, consolidate
+    fulfillmentChannel: FulfillmentChannelType;
+    LandedPrice: MoneyType;
+    ListingPrice: MoneyType;
+    Shipping: MoneyType;
+    Points?: Points;
+};
+export type MarketplaceType = string; // [A-Z0-9]+
+export type MoneyType = {
+    Amount: number;
+    CurrencyCode: 'USD' | 'EUR' | 'GBP' | 'RMB' | 'INR' | 'JPY' | 'CAD' | 'MXN';
+};
+export type OfferCount = {
+    condition: 'New' | 'Used' | 'Collectible' | 'Refurbished' | 'Club'; // TODO: this is used in multiple places, consolidate
+    fulfillmentChannel: FulfillmentChannelType;
+};
+export type OfferCountType = {
+    OfferCount: OfferCount;
+};
+export type Points = {
+    PointsNumber: number;
+    PointsMonetaryValue: MoneyType;
+};
+export type PriceToEstimateFees = {
+    ListingPrice: MoneyType;
+    Shipping?: MoneyType;
+    Points?: Points;
+};
+export type SellerFeedbackRating = {
+    SellerPositiveFeedbackRating?: number;
+    FeedbackCount?: number;
+};
+export type ShipsFrom = {
+    State?: string;
+    Country?: string;
+};
+
 // https://docs.developer.amazonservices.com/en_UK/recommendations/Recommendations_Datatypes.html
 
 // https://docs.developer.amazonservices.com/en_UK/reports/Reports_Datatypes.html
