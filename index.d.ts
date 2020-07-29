@@ -1489,3 +1489,17 @@ export type ShipmentDetail = {
 };
 
 // https://docs.developer.amazonservices.com/en_UK/subscriptions/Subscriptions_Datatypes.html
+
+export type AttributeKeyValue = {
+    Key: 'sqsQueueUrl';
+    Value: string;
+};
+export type Destination = {
+    DeliveryChannel: 'SQS';
+    AttributeList?: Array<AttributeKeyValue>;
+};
+export type Subscription = {
+    NotificationType: string; // TODO: see https://docs.developer.amazonservices.com/en_UK/subscriptions/Subscriptions_NotificationType.html
+    Destination: Destination;
+    IsEnabled: boolean; // true | false ?
+};
