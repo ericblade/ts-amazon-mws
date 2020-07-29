@@ -1390,9 +1390,33 @@ export type WeightMeasure = {
     Unit: string;
 };
 
-
-
 // https://docs.developer.amazonservices.com/en_UK/reports/Reports_Datatypes.html
+
+export type ReportInfo = {
+    ReportId: string;
+    ReportType: string;
+    ReportRequestId: string;
+    AvailableDate: DateTime;
+    Acknowledged: boolean; // true | false ?
+    AcknowledgedDate: DateTime;
+};
+export type ReportRequestInfo = {
+    ReportRequestId: string;
+    ReportType: string; // TODO: make a union of all the report types
+    StartDate: DateTime;
+    EndDate: DateTime;
+    Scheduled: boolean; // true | false ?
+    SubmittedDate: DateTime;
+    ReportProcessingStatus: string; // TODO: make a union of all report processing statuses?
+    GeneratedReportId: string;
+    StartedProcessingDate: DateTime;
+    CompletedDate: DateTime;
+};
+export type ReportSchedule = {
+    ReportType: string; // TODO: make a union of all the report types
+    Schedule: string; // TODO: make a union of all valid schedule strings?
+    ScheduledDate: DateTime;
+};
 
 // https://docs.developer.amazonservices.com/en_UK/sellers/Sellers_Datatypes.html
 
