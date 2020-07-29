@@ -1436,6 +1436,56 @@ export type Participation = {
 
 // https://docs.developer.amazonservices.com/en_UK/shipment_invoicing/ShipmentInvoicing_Datatypes.html
 
-
+export namespace ShipmentInvoicing {
+    export type Address = {
+        Name: string;
+        AddressLine1?: string;
+        AddressLine2?: string;
+        AddressLine3?: string;
+        City?: string;
+        County?: string;
+        District?: string;
+        StateOrRegion?: string;
+        PostalCode?: string;
+        CountryCode?: string;
+        Phone?: string;
+        AddressType?: 'Commercial' | 'Residential';
+    };
+    // TODO: extract the previous declaration of Shipment to a namespace
+    export type Shipment = {
+        AmazonShipmentId: string;
+        InvoiceStatus: 'Processing' | 'Accepted' | 'NotFound' | 'Errored';
+    };
+    // TODO: extract the previous declaration of ShipmentItem to a namespace
+    export type ShipmentItem = {
+        ASIN: string;
+        SellerSKU?: string;
+        OrderItemId: string;
+        Title?: string;
+        QuantityOrdered: number;
+        ItemPrice?: Money;
+        ShippingPrice?: Money;
+        GiftWrapPrice?: Money;
+        ShippingDiscount?: Money;
+        PromotionDiscount?: Money;
+        SerialNumber: SerialNumbers;
+    };
+}
+export type SerialNumbers = {
+    SerialNumber?: string;
+};
+export type ShipmentDetail = {
+    AmazonOrderId: string;
+    AmazonShipmentId: string;
+    PurchaseDate: DateTime;
+    ShippingAddress?: ShipmentInvoicing.Address;
+    PaymentMethodDetails?: PaymentMethodDetails;
+    MarketplaceId?: string;
+    BuyerName?: string;
+    BuyerCounty?: string;
+    BuyerTaxInfo?: string;
+    ShipmentItems: ShipmentInvoicing.ShipmentItem;
+    WarehouseId?: string;
+};
 
 // https://docs.developer.amazonservices.com/en_UK/subscriptions/Subscriptions_Datatypes.html
