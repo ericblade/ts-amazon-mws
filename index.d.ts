@@ -1295,6 +1295,103 @@ export type ShipsFrom = {
 
 // https://docs.developer.amazonservices.com/en_UK/recommendations/Recommendations_Datatypes.html
 
+export type AdvertisingRecommendation = {
+    RecommendationId: string;
+    RecommendationReason: string;
+    LastUpdated: DateTime;
+    ItemIdentifier: ProductIdentifier;
+    ItemName?: string;
+    BrandName?: string;
+    ProductCategory?: string;
+    SalesRank?: number;
+    YourPricePlusShipping: Price;
+    LowestPricePlusShipping: Price;
+    AvailableQuantity: number;
+    SalesForTheLast30Days: number;
+};
+export type CategoryQuery = {
+    RecommendationCategory: 'Selection' | 'Fulfillment' | 'ListingQuality' | 'GlobalSelling' | 'Advertising';
+    FilterOptions: {
+        QualitySet?: 'Defect' | 'Quarantine'; // ListingQuality
+        ListingStatus?: 'Active' | 'Inactive'; // ListingQuality
+        BrandName?: string; // Selection, Fulfillment, GlobalSelling, Advertising
+        ProductCategory?: string; // Selection, Fulfillment, GlobalSelling, Advertising
+        IncludeCommonRecommendations?: boolean; // Selection
+    };
+};
+export type DimensionMeasure = {
+    Value: number;
+    Unit: string;
+};
+export type FulfillmentRecommendation = {
+    RecommendationId: string;
+    RecommendationReason: string;
+    LastUpdated: DateTime;
+    ItemIdentifier: ProductIdentifier;
+    ItemName?: string;
+    BrandName?: string;
+    ProductCategory?: string;
+    SalesRank?: number;
+    BuyboxPrice?: Price;
+    NumberOfOffers?: number;
+    NumberOfOffersFulfilledByAmazon?: number;
+    AverageCustomerReview?: number;
+    NumberOfCustomerReviews?: number;
+    ItemDimensions?: ItemDimensions;
+};
+export type GlobalSellingRecommendation = FulfillmentRecommendation;
+export type InventoryRecommendation = {
+    RecommendationId: string;
+    RecommendationReason: string;
+    LastUpdated: DateTime;
+    ItemIdentifier: ProductIdentifier;
+    ItemName?: string;
+    FulfillmentChannel?: 'MFN' | 'AFN';
+    AvailableQuantity?: number;
+    DaysUntilStockRunsOut?: number;
+    DaysOutOfStockLast30Days?: number;
+};
+export type ItemDimensions = {
+    Height: DimensionMeasure;
+    Width: DimensionMeasure;
+    Length: DimensionMeasure;
+    Weight: WeightMeasure;
+};
+export type Price = {
+    CurrencyCode: string;
+    Amount: number;
+};
+export type PricingRecommendation = {
+    RecommendationId: string;
+    RecommendationReason: string;
+    LastUpdated: DateTime;
+    ItemIdentifier: ProductIdentifier;
+    ItemName?: string;
+    Condition?: string;
+    SubCondition?: string;
+    FulfillmentChannel?: 'MFN' | 'AFN';
+    YourPricePlusShipping?: Price;
+    LowestPricePlusShipping?: Price;
+    PriceDifferenceToLowPrice?: Price;
+    MedianPricePlusShipping?: Price;
+    LowestMerchantFulfilledOfferPrice?: Price;
+    LowestAmazonFulfilledOfferPrice?: Price;
+    NumberOfOffers?: number;
+    NumberOfMerchantFulfilledOffers?: number;
+    NumberOfAmazonFulfilledOffers?: number;
+};
+export type ProductIdentifier = {
+    Asin?: string;
+    Sku?: string;
+    Upc?: string;
+};
+export type WeightMeasure = {
+    Value: number;
+    Unit: string;
+};
+
+
+
 // https://docs.developer.amazonservices.com/en_UK/reports/Reports_Datatypes.html
 
 // https://docs.developer.amazonservices.com/en_UK/sellers/Sellers_Datatypes.html
