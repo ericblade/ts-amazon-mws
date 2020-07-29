@@ -1420,6 +1420,22 @@ export type ReportSchedule = {
 
 // https://docs.developer.amazonservices.com/en_UK/sellers/Sellers_Datatypes.html
 
+export type Marketplace = {
+    MarketplaceId: string;
+    Name: string;
+    DefaultCountryCode: string;
+    DefaultCurrencyCode: string;
+    DefaultLanguageCode: string;
+    DomainName: string;
+};
+export type Participation = {
+    MarketplaceId: string;
+    SellerId: string;
+    HasSellerSuspendedListings: 'Yes' | 'No';
+};
+
 // https://docs.developer.amazonservices.com/en_UK/shipment_invoicing/ShipmentInvoicing_Datatypes.html
+
+
 
 // https://docs.developer.amazonservices.com/en_UK/subscriptions/Subscriptions_Datatypes.html
